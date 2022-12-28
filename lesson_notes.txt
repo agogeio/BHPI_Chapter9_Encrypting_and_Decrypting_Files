@@ -6,3 +6,9 @@ Create an high level overy view of crypto based on:
 https://www.pycryptodome.org/
 and
 https://cryptobook.nakov.com/
+
+Walking the file system and searching for specific file types
+
+Next steps:
+
+Ask for a path and file extension and encrypt those files
