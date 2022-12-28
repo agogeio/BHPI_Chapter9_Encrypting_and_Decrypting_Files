@@ -1,0 +1,8 @@
+Validate that the Crypto pip package is not installed:
+pip list | grep Crypto
+
+Create an high level overy view of crypto based on: 
+
+https://www.pycryptodome.org/
+and
+https://cryptobook.nakov.com/

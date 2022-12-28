@@ -1,0 +1,6 @@
+/bin
+/include
+/keys
+/lib
+/lib64
+*.cfg
