@@ -3,4 +3,5 @@
 /keys
 /lib
 /lib64
+/encryption_target
 *.cfg
