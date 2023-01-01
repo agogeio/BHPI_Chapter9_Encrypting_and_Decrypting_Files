@@ -1,21 +1,22 @@
+""" Encrypts and decrypts data based on file extension """
 import base64
 import os
 import zlib
 
-from Cryptodome.Cipher import AES, PKCS1_OAEP
-from Cryptodome.PublicKey import RSA 
-from Cryptodome.Random import get_random_bytes
 from io import BytesIO
+from Cryptodome.Cipher import AES,PKCS1_OAEP
+from Cryptodome.PublicKey import RSA
+from Cryptodome.Random import get_random_bytes
+
 
 PRI_KEY_LOC = './keys/key.pri'
 PUB_KEY_LOC = './keys/key.pub'
 ENCRYPTION_TARGET = './encryption_target'
-# ENCRYPTION_TARGET = '/home/saiello/Documents/agogeio'
 
 file_list = []
 
-
-def generate_write_rsa_keys():
+def generate_write_rsa_keys() -> None:
+    """ Generates RSA Keys """
     rsa_key = RSA.generate(2048)
     #* Go to Definition - It must be at least 1024, but **2048 is recommended.**
     print(rsa_key)
@@ -30,7 +31,8 @@ def generate_write_rsa_keys():
         f_pub.write(public_key)
 
 
-def get_rsa_keys(keytype):
+def get_rsa_keys(keytype) -> tuple:
+    """ Gets the selected RSA key (public or private) """
     if keytype == 'pri':
         with open(PRI_KEY_LOC) as f:
             key = f.read()
@@ -38,13 +40,14 @@ def get_rsa_keys(keytype):
         with open(PUB_KEY_LOC) as f:
             key = f.read()
     else:
-        print(f'Invalid key type')
+        print('Invalid key type')
 
     rsakey = RSA.importKey(key)
     return (PKCS1_OAEP.new(rsakey), rsakey.size_in_bytes())
 
 
-def encrypt(plaintext):
+def encrypt(plaintext) -> bytes:
+    """ Encrypts incoming plaintext bytes """
     compressed_text = zlib.compress(plaintext)
     session_key = get_random_bytes(32)
     cipher_aes = AES.new(session_key, AES.MODE_EAX)
@@ -53,7 +56,7 @@ def encrypt(plaintext):
     #? print(session_key)
     #? print('')
 
-    #* Go to Definition 
+    #* Go to Definition
     #* :param key:
     #*     The secret key to use in the symmetric cipher.
 
@@ -72,17 +75,16 @@ def encrypt(plaintext):
 
     #? Definition of nonce for cryptography
     #? https://en.wikipedia.org/wiki/Cryptographic_nonce
-    '''
-    In cryptography, a nonce is an arbitrary number that can be used just 
-    once in a cryptographic communication.[1] It is often a random or pseudo-random 
-    number issued in an authentication protocol to ensure that old communications 
-    cannot be reused in replay attacks. They can also be useful as ***initialization 
-    vectors*** and in cryptographic hash functions.
-    '''
+    #* In cryptography, a nonce is an arbitrary number that can be used just 
+    #* once in a cryptographic communication.[1] It is often a random or pseudo-random 
+    #* number issued in an authentication protocol to ensure that old communications 
+    #* cannot be reused in replay attacks. They can also be useful as ***initialization 
+    #* vectors*** and in cryptographic hash functions.
+
 
     encrypted = base64.encodebytes(msg_payload)
     return encrypted
-    
+
 
 def decrypt(encrypted):
     encrypted_bytes = BytesIO(base64.decodebytes(encrypted))
@@ -98,7 +100,8 @@ def decrypt(encrypted):
     return plain_text
 
 
-def search_dir(dir_path, extension):
+def search_dir(dir_path, extension) -> list:
+    """ Searches through file paths for files with the desired extensions """
   # loop through all the files in the directory
     for file in os.listdir(dir_path):
         # create a full path for the file
@@ -110,7 +113,8 @@ def search_dir(dir_path, extension):
         else:
             if extension == '.*':
                 file_list.append(file_path)
-            elif file_path.__contains__(extension):
+            # elif file_path.__contains__(extension):
+            elif extension in file_path:
                 file_list.append(file_path)
     return file_list
 
@@ -123,7 +127,10 @@ if __name__ == '__main__':
 
         print('Continuing cryptographic program')
 
-        key_gen = input('Do you need to generate new RSA keys? Warning this will overwrite existing RSA keys and could make decrypting encrypted files impossible (yes/no): ')
+        key_gen = input('Do you need to generate new RSA keys? \
+            Warning this will overwrite existing RSA keys and \
+                could make decrypting encrypted files impossible (yes/no): ')
+
         encrypt_decrypt = input('Do you wish to "encrypt" or "decrypt" files? (encrypt/decrypt): ')
 
         if key_gen == 'yes':
@@ -132,18 +139,17 @@ if __name__ == '__main__':
             print('You chose not to generate new RSA keys')
         else:
             print('You did not enter a valid answer, no action taken')
-        
         if encrypt_decrypt == 'encrypt':
-            extension = input('What is the file type you would like to encrypt; example ".txt", ".pptx", or ".*" for all: ')
+            extension = input('What is the file type you would like to encrypt;\
+                example ".txt", ".pptx", or ".*" for all: ')
             print('Indexing files')
             file_list = search_dir(ENCRYPTION_TARGET, extension)
-            
             for file in file_list:
                 with open(file, 'rb') as f:
-                    cipher_file = encrypt(f.read())
+                    CIPHER_FILE = encrypt(f.read())
                     file_name = f'{file}.enc'
                     with open(file_name, 'wb') as wf:
-                        wf.write(cipher_file)
+                        wf.write(CIPHER_FILE)
 
                 os.remove(file)
 
@@ -168,7 +174,3 @@ if __name__ == '__main__':
 
         else:
             print('You did not enter a valid encrypt / decrypt answer, no action taken')
-
-
-        # key = get_rsa_keys('pub')
-        # print(key)
